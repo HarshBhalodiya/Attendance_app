@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="mb-0 fw-700">My Attendance</h4>
+    <span class="text-muted small">{{ current_user.name }} · Roll no. {{ current_user.roll_no }}</span>
+  </div>
+  <a href="/insights/{{ current_user.id }}" class="btn btn-dark btn-sm px-3">
+    Get AI insight
+  </a>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num {% if pct < 75 %}text-danger{% else %}text-success{% endif %}">
+        {{ pct }}%
+      </div>
+      <div class="stat-label">Overall attendance</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ total }}</div>
+      <div class="stat-label">Total classes</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#15803d">{{ present }}</div>
+      <div class="stat-label">Present</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#b91c1c">{{ absent }}</div>
+      <div class="stat-label">Absent</div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance status banner -->
+{% if total == 0 %}
+<div class="alert border-0 rounded-3 mb-4" style="background:#f3f4f6;color:#6b7280">
+  No attendance records yet. Your teacher hasn't marked attendance yet.
+</div>
+{% elif pct < 60 %}
+<div class="alert-banner mb-4">
+  <span style="font-size:1.1rem">⚠</span>
+  <span><strong>Critical —</strong> your attendance is below 60%. Please contact your teacher immediately.</span>
+</div>
+{% elif pct < 75 %}
+<div class="mb-4" style="background:#fef9ee;border:1px solid #f59e0b;border-radius:10px;padding:12px 18px;color:#92400e;font-size:.875rem">
+  <strong>Warning —</strong> your attendance is below 75%. You need to attend more classes to meet the minimum requirement.
+</div>
+{% else %}
+<div class="mb-4" style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 18px;color:#15803d;font-size:.875rem">
+  <strong>Good standing —</strong> your attendance is above 75%. Keep it up!
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+  <!-- Subject-wise breakdown -->
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header px-4 py-3">Subject-wise breakdown</div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th class="px-4">Subject</th>
+              <th class="text-center">Present</th>
+              <th class="text-center">Absent</th>
+              <th>Attendance %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in subject_stats %}
+            <tr>
+              <td class="px-4 fw-500 align-middle">{{ row.name }}</td>
+              <td class="text-center align-middle" style="color:#15803d;font-weight:500">{{ row.present }}</td>
+              <td class="text-center align-middle" style="color:#b91c1c;font-weight:500">{{ row.absent }}</td>
+              <td class="align-middle">
+                <span class="fw-500">{{ row.pct }}%</span>
+                <div class="pct-bar" style="width:100px">
+                  <div class="pct-fill"
+                    style="width:{{ row.pct }}%;
+                           background:{% if row.at_risk %}#ef4444{% else %}#22c55e{% endif %}">
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-3">No subject data yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent absences -->
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header px-4 py-3">
+        My recent absences
+        {% if absences %}
+          <span class="text-muted small ms-1">(last {{ absences|length }})</span>
+        {% endif %}
+      </div>
+      {% if absences %}
+      <ul class="list-group list-group-flush">
+        {% for r in absences %}
+        <li class="list-group-item px-4 py-2 d-flex justify-content-between align-items-center">
+          <div>
+            <div class="small fw-500">{{ r.date.strftime('%d %b %Y') }}</div>
+            <div class="text-muted" style="font-size:.75rem">{{ r.subject.name }}</div>
+          </div>
+          <span class="badge-risk">Absent</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-center text-muted py-4">
+        No absences recorded — great job!
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- AI insight CTA -->
+    <div class="card mt-3">
+      <div class="card-body px-4 py-3 text-center">
+        <div class="fw-500 mb-1" style="font-size:.9rem">Want personalised advice?</div>
+        <div class="text-muted small mb-3">
+          Get an AI-powered analysis of your attendance with suggestions to improve.
+        </div>
+        <a href="/insights/{{ current_user.id }}" class="btn btn-dark btn-sm px-4">
+          Get my AI insight
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

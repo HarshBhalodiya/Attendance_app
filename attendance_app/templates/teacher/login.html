@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#ffffff;margin:-28px -32px;">
+  <div style="width:100%;max-width:420px;padding:20px;">
+
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:64px;height:64px;background:#4e9af1;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div style="color:#1f2937;font-size:1.4rem;font-weight:700;">Teacher Portal</div>
+      <div style="color:#6b7280;font-size:.85rem;margin-top:4px;">Attendance Management System</div>
+    </div>
+
+    <div style="background:#fff;border-radius:16px;padding:32px;box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);border: 1px solid #e5e7eb;">
+      <div style="font-size:1rem;font-weight:600;color:#1a1a2e;margin-bottom:4px;">Sign in</div>
+      <div style="font-size:.8rem;color:#6b7280;margin-bottom:24px;">Enter your teacher credentials</div>
+
+      {% with messages=get_flashed_messages(with_categories=true) %}
+        {% for category,message in messages %}
+          <!-- <div class="alert alert-{{category}} border-0 rounded-3 py-2 mb-3" style="font-size:.85rem;">{{message}}</div> -->
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST">
+        <div style="margin-bottom:14px;">
+          <label style="font-size:.8rem;font-weight:500;color:#374151;display:block;margin-bottom:6px;">Username</label>
+          <input type="text" name="username" class="form-control" placeholder="Your username" required autofocus style="border-radius:8px;padding:10px 14px;font-size:.9rem;border-color:#e5e7eb;"/>
+        </div>
+        <div style="margin-bottom:18px;">
+          <label style="font-size:.8rem;font-weight:500;color:#374151;display:block;margin-bottom:6px;">Password</label>
+          <input type="password" name="password" class="form-control" placeholder="Your password" required style="border-radius:8px;padding:10px 14px;font-size:.9rem;border-color:#e5e7eb;"/>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="form-check">
+            <input type="checkbox" name="remember" class="form-check-input" id="remember"/>
+            <label class="form-check-label" for="remember" style="font-size:.8rem;color:#6b7280;">Remember me</label>
+          </div>
+        </div>
+        <button type="submit" style="width:100%;padding:11px;background:#4e9af1;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:500;cursor:pointer;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          Login
+        </button>
+      </form>
+
+      <!-- <hr style="margin:20px 0;border-color:#f3f4f6;"/>
+      <p style="text-align:center;font-size:.8rem;color:#9ca3af;margin:0;">
+        No account? <a href="/register" style="color:#1a1a2e;font-weight:600;">Register here</a>
+      </p> -->
+    </div>
+  </div>
+</div>
+{% endblock %}

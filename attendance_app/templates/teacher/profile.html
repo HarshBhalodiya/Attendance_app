@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <h4 class="mb-0 fw-700">My Profile</h4>
+</div>
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Update profile</div>
+      <div class="card-body px-4 py-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label small fw-500">Full name</label>
+            <input type="text" name="name" class="form-control" value="{{ current_user.name or '' }}"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-500">Username</label>
+            <input type="text" class="form-control" value="{{ current_user.username }}" disabled/>
+            <div class="text-muted" style="font-size:.75rem;margin-top:4px">Username cannot be changed.</div>
+          </div>
+          <hr/>
+          <div class="mb-1 fw-500 small">Change password (leave blank to keep current)</div>
+          <div class="mb-3 mt-2">
+            <label class="form-label small">Current password</label>
+            <input type="password" name="current_password" class="form-control"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">New password</label>
+            <input type="password" name="new_password" class="form-control" placeholder="Min. 6 characters"/>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small">Confirm new password</label>
+            <input type="password" name="confirm_password" class="form-control"/>
+          </div>
+          <button type="submit" class="btn btn-dark w-100">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Account info</div>
+      <div class="card-body px-4 py-4">
+        <div class="mb-3">
+          <div class="text-muted small">Role</div>
+          <div class="fw-500">Teacher</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted small">Username</div>
+          <div class="fw-500">{{ current_user.username }}</div>
+        </div>
+        <div class="mb-3">
+          <div class="text-muted small">Students managed</div>
+          <div class="fw-500">{{ current_user.students | length }}</div>
+        </div>
+        <div>
+          <div class="text-muted small">Subjects</div>
+          <div class="fw-500">{{ current_user.subjects | length }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

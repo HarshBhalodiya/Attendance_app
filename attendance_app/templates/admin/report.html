@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="mb-0 fw-700">School report</h4>
+    <span class="text-muted small">School-wide attendance overview</span>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ total_students }}</div>
+      <div class="stat-label">Total students</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num {% if avg_pct < 75 %}text-danger{% else %}text-success{% endif %}">{{ avg_pct }}%</div>
+      <div class="stat-label">School avg. attendance</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#b91c1c">{{ at_risk_count }}</div>
+      <div class="stat-label">Students at risk</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ total_all }}</div>
+      <div class="stat-label">Total records</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">Attendance % per student (all classes)</div>
+      <div class="card-body px-4 py-3">
+        {% if total_students > 0 %}
+          <canvas id="barChart" height="90"></canvas>
+        {% else %}
+          <div class="text-center text-muted py-4">No student data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">Overall present vs absent</div>
+      <div class="card-body px-4 py-3 d-flex flex-column align-items-center justify-content-center">
+        {% if total_all > 0 %}
+          <canvas id="doughnutChart" style="max-width:180px;max-height:180px"></canvas>
+          <div class="mt-3 d-flex gap-3" style="font-size:.8rem">
+            <span><span style="color:#22c55e">●</span> Present: <strong>{{ present_all }}</strong></span>
+            <span><span style="color:#ef4444">●</span> Absent: <strong>{{ absent_all }}</strong></span>
+          </div>
+        {% else %}
+          <div class="text-center text-muted py-4">No data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+{% if total_students > 0 %}
+new Chart(document.getElementById('barChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: {{ student_labels | tojson }},
+    datasets: [{ label: 'Attendance %', data: {{ student_pcts | tojson }},
+      backgroundColor: {{ student_colors | tojson }}, borderRadius: 6, borderSkipped: false }]
+  },
+  options: { responsive: true,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.raw}%` } } },
+    scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+  }
+});
+{% endif %}
+{% if total_all > 0 %}
+new Chart(document.getElementById('doughnutChart').getContext('2d'), {
+  type: 'doughnut',
+  data: { labels: ['Present','Absent'],
+    datasets: [{ data: [{{ present_all }},{{ absent_all }}], backgroundColor: ['#22c55e','#ef4444'], borderWidth: 0, hoverOffset: 6 }]
+  },
+  options: { responsive: true, cutout: '68%',
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}` } } }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

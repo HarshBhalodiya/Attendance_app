@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<div class="auth-card card p-4">
+    <div class="card-body">
+        <div class="auth-title">Create teacher account</div>
+        <div class="auth-subtitle">
+            This is for teachers only. Students are added by the teacher from the Students page.
+        </div>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-500 small">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" required autofocus/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-500 small">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Min. 6 characters" required/>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-500 small">Confirm password</label>
+                <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password" required/>
+            </div>
+            <button type="submit" class="btn btn-dark w-100 py-2">Create teacher account</button>
+        </form>
+
+        <hr class="my-3" />
+        <p class="text-center text-muted small mb-0">
+            Already have an account? <a href="/login" class="text-dark fw-500">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

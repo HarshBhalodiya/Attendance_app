@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/teachers" class="btn btn-outline-secondary btn-sm">← Back</a>
+  <div>
+    <h4 class="mb-0 fw-700">{{ teacher.name or teacher.username }}</h4>
+    <span class="text-muted small">@{{ teacher.username }} ·
+      {% if teacher.is_active %}<span style="color:#15803d">Active</span>{% else %}<span style="color:#b91c1c">Inactive</span>{% endif %}
+    </span>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ student_data|length }}</div>
+      <div class="stat-label">Total students</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#b91c1c">{{ student_data|selectattr('at_risk')|list|length }}</div>
+      <div class="stat-label">At risk</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ subjects|length }}</div>
+      <div class="stat-label">Subjects</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Students</div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th class="px-4">Roll no.</th>
+          <th>Name</th>
+          <th>Login</th>
+          <th>Attendance %</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in student_data %}
+        <tr>
+          <td class="px-4 text-muted small align-middle">{{ row.student.roll_no }}</td>
+          <td class="fw-500 align-middle">{{ row.student.name }}</td>
+          <td class="align-middle">
+            {% if row.student.username %}
+              <span class="badge-good">{{ row.student.username }}</span>
+            {% else %}
+              <span style="font-size:.75rem;color:#9ca3af">No login</span>
+            {% endif %}
+          </td>
+          <td class="align-middle">
+            <span class="fw-500">{{ row.pct }}%</span>
+            <div class="pct-bar" style="width:100px">
+              <div class="pct-fill" style="width:{{ row.pct }}%;background:{% if row.at_risk %}#ef4444{% else %}#22c55e{% endif %}"></div>
+            </div>
+          </td>
+          <td class="align-middle">
+            {% if row.pct == 0 %}<span style="font-size:.75rem;color:#9ca3af">No data</span>
+            {% elif row.at_risk %}<span class="badge-risk">At risk</span>
+            {% else %}<span class="badge-good">Good</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No students yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

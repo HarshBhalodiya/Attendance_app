@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="mb-0 fw-700">Attendance records</h4>
+        <span class="text-muted small">Sorted by lowest attendance first</span>
+    </div>
+    <a href="/export?subject_id={{ selected_subject or '' }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-outline-secondary btn-sm px-3">
+    Export CSV
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body px-4 py-3">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">Subject</label>
+                <select name="subject_id" class="form-select form-select-sm">
+          <option value="">All subjects</option>
+          {% for s in subjects %}
+          <option value="{{ s.id }}" {% if selected_subject == s.id %}selected{% endif %}>
+            {{ s.name }}
+          </option>
+          {% endfor %}
+        </select>
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">From date</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}" />
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">To date</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}" />
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-dark btn-sm w-100">Apply</button>
+            </div>
+            <div class="col-sm-1">
+                <a href="/view" class="btn btn-outline-secondary btn-sm w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary table -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Roll no.</th>
+                    <th>Name</th>
+                    <th class="text-center">Total</th>
+                    <th class="text-center">Present</th>
+                    <th class="text-center">Absent</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary %}
+                <tr>
+                    <td class="px-4 text-muted small align-middle">{{ row.student.roll_no }}</td>
+                    <td class="fw-500 align-middle">{{ row.student.name }}</td>
+                    <td class="text-center align-middle text-muted small">{{ row.total }}</td>
+                    <td class="text-center align-middle" style="color:#15803d; font-weight:500">
+                        {{ row.present }}
+                    </td>
+                    <td class="text-center align-middle" style="color:#b91c1c; font-weight:500">
+                        {{ row.absent }}
+                    </td>
+                    <td class="align-middle">
+                        <span class="fw-500">{{ row.pct }}%</span>
+                        <div class="pct-bar" style="width:100px">
+                            <div class="pct-fill" style="width:{{ row.pct }}%;
+                       background:{% if row.at_risk %}#ef4444{% else %}#22c55e{% endif %}">
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        {% if row.total == 0 %}
+                        <span style="font-size:.75rem;color:#9ca3af">No data</span> {% elif row.at_risk %}
+                        <span class="badge-risk">At risk</span> {% else %}
+                        <span class="badge-good">Good</span> {% endif %}
+                    </td>
+                    <td class="align-middle">
+                        <a href="/students/{{ row.student.id }}" class="btn btn-sm btn-outline-secondary">
+              Detail
+            </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        No records found. <a href="/mark">Mark attendance first.</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

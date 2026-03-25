@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/view" class="btn btn-outline-secondary btn-sm">← Back</a>
+  <div>
+    <h4 class="mb-0 fw-700">AI Insight — {{ student.name }}</h4>
+    <span class="text-muted small">Roll no. {{ student.roll_no }}</span>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Left: AI insight card -->
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header px-4 py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <span style="font-size:16px">✦</span>
+          <span class="fw-500">Claude AI analysis</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          {% if from_cache %}
+            <span class="text-muted" style="font-size:.75rem">
+              Cached · refreshes every 24 hrs
+            </span>
+          {% endif %}
+          <form method="POST" action="/insights/{{ student.id }}/refresh">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+              Refresh
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body px-4 py-4">
+        {% if 'unavailable' in insight.lower() %}
+          <!-- API error state -->
+          <div style="background:#fef2f2; border-radius:8px; padding:16px; color:#b91c1c; font-size:.875rem">
+            <strong>Could not reach AI.</strong> Check that your ANTHROPIC_API_KEY is set correctly in your .env file.
+            <div class="mt-2 text-muted" style="font-size:.8rem">{{ insight }}</div>
+          </div>
+        {% else %}
+          <!-- Render each numbered point as a card -->
+          {% set lines = insight.split('\n') %}
+          {% for line in lines %}
+            {% if line.strip() %}
+              {% if line.strip().startswith('1.') %}
+                <div style="background:#fef9ee; border-left:3px solid #f59e0b; border-radius:0 8px 8px 0; padding:14px 16px; margin-bottom:12px;">
+                  <div class="fw-500 small mb-1" style="color:#92400e">Risk assessment</div>
+                  <div style="font-size:.9rem; color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip().startswith('2.') %}
+                <div style="background:#eff6ff; border-left:3px solid #3b82f6; border-radius:0 8px 8px 0; padding:14px 16px; margin-bottom:12px;">
+                  <div class="fw-500 small mb-1" style="color:#1e40af">Pattern analysis</div>
+                  <div style="font-size:.9rem; color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip().startswith('3.') %}
+                <div style="background:#f0fdf4; border-left:3px solid #22c55e; border-radius:0 8px 8px 0; padding:14px 16px; margin-bottom:12px;">
+                  <div class="fw-500 small mb-1" style="color:#15803d">Teacher suggestion</div>
+                  <div style="font-size:.9rem; color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip() %}
+                <div style="font-size:.875rem; color:#6b7280; margin-bottom:8px;">
+                  {{ line.strip() }}
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: student stats -->
+  <div class="col-md-4">
+
+    <!-- Attendance summary -->
+    <div class="card mb-3">
+      <div class="card-header px-4 py-3">Attendance summary</div>
+      <div class="card-body px-4">
+        <div class="text-center mb-3">
+          <div class="stat-num {% if pct < 75 %}text-danger{% else %}text-success{% endif %}">
+            {{ pct }}%
+          </div>
+          <div class="text-muted small">overall attendance</div>
+        </div>
+        <div class="pct-bar mb-3" style="height:8px">
+          <div class="pct-fill"
+            style="width:{{ pct }}%;
+                   height:8px;
+                   background:{% if pct < 75 %}#ef4444{% else %}#22c55e{% endif %}">
+          </div>
+        </div>
+        <div class="d-flex justify-content-between" style="font-size:.85rem">
+          <div class="text-center">
+            <div class="fw-500" style="color:#15803d; font-size:1.2rem">{{ present }}</div>
+            <div class="text-muted">Present</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-500" style="color:#b91c1c; font-size:1.2rem">{{ absent }}</div>
+            <div class="text-muted">Absent</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-500 text-dark" style="font-size:1.2rem">{{ total }}</div>
+            <div class="text-muted">Total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk badge -->
+    <div class="card mb-3">
+      <div class="card-body px-4 py-3 text-center">
+        {% if pct == 0 %}
+          <div style="font-size:.9rem; color:#9ca3af">No attendance data yet</div>
+        {% elif pct < 60 %}
+          <div class="badge-risk" style="font-size:.9rem; padding:6px 16px">Critical risk</div>
+          <div class="text-muted small mt-2">Immediate attention needed</div>
+        {% elif pct < 75 %}
+          <div style="background:#fef3c7; color:#92400e; border-radius:20px; font-size:.9rem; padding:6px 16px; display:inline-block; font-weight:500">Warning</div>
+          <div class="text-muted small mt-2">Below minimum threshold</div>
+        {% else %}
+          <div class="badge-good" style="font-size:.9rem; padding:6px 16px">Good standing</div>
+          <div class="text-muted small mt-2">Above 75% threshold</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="card">
+      <div class="card-body px-4 py-3 d-grid gap-2">
+        <a href="/students/{{ student.id }}" class="btn btn-outline-secondary btn-sm">
+          View full history
+        </a>
+        <a href="/view" class="btn btn-outline-secondary btn-sm">
+          Back to all records
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

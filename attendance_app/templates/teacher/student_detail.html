@@ -1,0 +1,133 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/students" class="btn btn-outline-secondary btn-sm">← Back</a>
+    <div>
+        <h4 class="mb-0 fw-700">{{ student.name }}</h4>
+        <span class="text-muted small">Roll no. {{ student.roll_no }}
+      {% if student.email %} · {{ student.email }}{% endif %}
+    </span>
+    </div>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-3">
+        <div class="stat-card">
+            <div class="stat-num text-dark">{{ total }}</div>
+            <div class="stat-label">Total classes</div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="stat-card">
+            <div class="stat-num" style="color:#15803d">{{ present }}</div>
+            <div class="stat-label">Present</div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="stat-card">
+            <div class="stat-num" style="color:#b91c1c">{{ absent }}</div>
+            <div class="stat-label">Absent</div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="stat-card">
+            <div class="stat-num {% if pct < 75 %}text-danger{% else %}text-success{% endif %}">
+                {{ pct }}%
+            </div>
+            <div class="stat-label">
+                Attendance {% if pct
+                < 75 %} <span class="badge-risk ms-1">At risk</span>
+                    {% else %}
+                    <span class="badge-good ms-1">Good</span> {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body px-4 py-3">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">Subject</label>
+                <select name="subject_id" class="form-select form-select-sm">
+          <option value="">All subjects</option>
+          {% for s in subjects %}
+          <option value="{{ s.id }}" {% if selected_subject == s.id %}selected{% endif %}>
+            {{ s.name }}
+          </option>
+          {% endfor %}
+        </select>
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">From date</label>
+                <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from or '' }}" />
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">To date</label>
+                <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to or '' }}" />
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-dark btn-sm w-100">Apply</button>
+            </div>
+            <div class="col-sm-1">
+                <a href="/students/{{ student.id }}" class="btn btn-outline-secondary btn-sm w-100">
+          Clear
+        </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Attendance history table -->
+<div class="card">
+    <div class="card-header px-4 py-3">
+        Attendance history {% if records %}
+        <span class="text-muted small ms-2">({{ records|length }} records)</span> {% endif %}
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Date</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th class="text-end px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td class="px-4 align-middle">{{ r.date.strftime('%d %b %Y') }}</td>
+                    <td class="align-middle text-muted small">{{ r.subject.name }}</td>
+                    <td class="align-middle">
+                        {% if r.status == 'present' %}
+                        <span class="badge-good">Present</span> {% else %}
+                        <span class="badge-risk">Absent</span> {% endif %}
+                    </td>
+                    <td class="align-middle text-end px-4">
+                        <div class="d-inline-flex gap-2">
+                            <form method="POST" action="/attendance/toggle/{{ r.id }}" style="display:inline;" onsubmit="return confirm('Toggle status for this record? Make sure the percentage recalculates.')">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary py-0">Edit</button>
+                            </form>
+                            <form method="POST" action="/attendance/delete/{{ r.id }}" style="display:inline;" onsubmit="return confirm('Delete this attendance record entirely?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger py-0">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        No records found for the selected filters.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

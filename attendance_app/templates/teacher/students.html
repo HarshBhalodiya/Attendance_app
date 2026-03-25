@@ -1,0 +1,125 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="mb-0 fw-700">Students</h4>
+        <span class="text-muted small">Manage students and their login credentials</span>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header px-4 py-3">Add new student</div>
+    <div class="card-body px-4">
+        <form method="POST" class="row g-3">
+            <div class="col-sm-4">
+                <label class="form-label small fw-500 mb-1">Full name <span class="text-danger">*</span></label>
+                <input type="text" name="name" placeholder="e.g. Rahul Sharma" class="form-control" required/>
+            </div>
+            <div class="col-sm-2">
+                <label class="form-label small fw-500 mb-1">Roll no. <span class="text-danger">*</span></label>
+                <input type="text" name="roll_no" placeholder="e.g. CS001" class="form-control" required/>
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">Email</label>
+                <input type="email" name="email" placeholder="optional" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">Login username</label>
+                <input type="text" name="username" placeholder="for student login" class="form-control" />
+            </div>
+            <div class="col-sm-3">
+                <label class="form-label small fw-500 mb-1">Login password</label>
+                <input type="password" name="password" placeholder="min. 6 characters" class="form-control" />
+            </div>
+            <div class="col-sm-12">
+                <div class="text-muted" style="font-size:.78rem">
+                    Username and password are optional — set them so the student can log in and view their own attendance.
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-dark w-100">Add student</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header px-4 py-3">Bulk import students via CSV</div>
+    <div class="card-body px-4">
+        <form method="POST" enctype="multipart/form-data" class="row g-3 align-items-start">
+            <div class="col-sm-9">
+                <label class="form-label small fw-500 mb-1">Upload Spreadsheet (CSV) <span class="text-danger">*</span></label>
+                <input type="file" name="csv_file" accept=".csv" class="form-control" required/>
+                <div class="text-muted mt-2" style="font-size:.78rem">
+                    Ensure your CSV has the following columns without headers if possible (first row is auto-skipped): <br>
+                    <code>Name, RollNo, Email</code> (Email is optional).
+                </div>
+            </div>
+            <div class="col-sm-3 pt-4">
+                <button type="submit" class="btn btn-dark w-100">Upload CSV</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header px-4 py-3">All students ({{ students|length }})</div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Roll no.</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Login</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %} {% set pct = s.attendance_percentage() %}
+                <tr>
+                    <td class="px-4 text-muted small align-middle">{{ s.roll_no }}</td>
+                    <td class="fw-500 align-middle">{{ s.name }}</td>
+                    <td class="text-muted small align-middle">{{ s.email or '—' }}</td>
+                    <td class="align-middle">
+                        {% if s.username %}
+                        <span class="badge-good">{{ s.username }}</span> {% else %}
+                        <span style="font-size:.75rem;color:#9ca3af">No login set</span> {% endif %}
+                    </td>
+                    <td class="align-middle">
+                        {{ pct }}%
+                        <div class="pct-bar" style="width:100px">
+                            <div class="pct-fill" style="width:{{ pct }}%;
+                       background:{% if pct < 75 %}#ef4444{% else %}#22c55e{% endif %}">
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-middle">
+                        {% if pct == 0 %}
+                        <span style="font-size:.75rem;color:#9ca3af">No data</span> {% elif pct
+                        < 75 %} <span class="badge-risk">At risk</span>
+                            {% else %}
+                            <span class="badge-good">Good</span> {% endif %}
+                    </td>
+                    <td class="align-middle">
+                        <div class="d-flex gap-2">
+                            <a href="/students/{{ s.id }}" class="btn btn-sm btn-outline-secondary">Detail</a>
+                            <a href="/students/{{ s.id }}/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form method="POST" action="/students/delete/{{ s.id }}" onsubmit="return confirm('Delete {{ s.name }}? All their records will be removed.')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No students added yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

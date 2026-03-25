@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/dashboard" class="btn btn-outline-secondary btn-sm">← Back</a>
+  <div>
+    <h4 class="mb-0 fw-700">My AI Insight</h4>
+    <span class="text-muted small">Personalised analysis of your attendance</span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <span style="font-size:16px">✦</span>
+          <span class="fw-500">Claude AI analysis</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          {% if from_cache %}
+            <span class="text-muted" style="font-size:.75rem">Cached · refreshes every 24 hrs</span>
+          {% endif %}
+          <form method="POST" action="/insight/refresh">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Refresh</button>
+          </form>
+        </div>
+      </div>
+      <div class="card-body px-4 py-4">
+        {% if 'unavailable' in insight.lower() %}
+          <div style="background:#fef2f2;border-radius:8px;padding:16px;color:#b91c1c;font-size:.875rem">
+            <strong>Could not reach AI.</strong> Please try again later.
+            <div class="mt-2 text-muted" style="font-size:.8rem">{{ insight }}</div>
+          </div>
+        {% else %}
+          {% set lines = insight.split('\n') %}
+          {% for line in lines %}
+            {% if line.strip() %}
+              {% if line.strip().startswith('1.') %}
+                <div style="background:#fef9ee;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:12px">
+                  <div class="fw-500 small mb-1" style="color:#92400e">Your status</div>
+                  <div style="font-size:.9rem;color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip().startswith('2.') %}
+                <div style="background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:12px">
+                  <div class="fw-500 small mb-1" style="color:#1e40af">Pattern in your absences</div>
+                  <div style="font-size:.9rem;color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip().startswith('3.') %}
+                <div style="background:#f0fdf4;border-left:3px solid #22c55e;border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:12px">
+                  <div class="fw-500 small mb-1" style="color:#15803d">Tips to improve</div>
+                  <div style="font-size:.9rem;color:#1f2937">{{ line.strip()[2:].strip() }}</div>
+                </div>
+              {% elif line.strip() %}
+                <div style="font-size:.875rem;color:#6b7280;margin-bottom:8px">{{ line.strip() }}</div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-header">My stats</div>
+      <div class="card-body px-4">
+        <div class="text-center mb-3">
+          <div class="stat-num {% if pct < 75 %}text-danger{% else %}text-success{% endif %}">{{ pct }}%</div>
+          <div class="text-muted small">overall attendance</div>
+        </div>
+        <div class="pct-bar mb-3" style="height:8px">
+          <div class="pct-fill" style="width:{{ pct }}%;height:8px;background:{% if pct < 75 %}#ef4444{% else %}#22c55e{% endif %}"></div>
+        </div>
+        <div class="d-flex justify-content-between" style="font-size:.85rem">
+          <div class="text-center">
+            <div class="fw-500" style="color:#15803d;font-size:1.2rem">{{ present }}</div>
+            <div class="text-muted">Present</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-500" style="color:#b91c1c;font-size:1.2rem">{{ absent }}</div>
+            <div class="text-muted">Absent</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-500 text-dark" style="font-size:1.2rem">{{ total }}</div>
+            <div class="text-muted">Total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body px-4 py-3 d-grid gap-2">
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">View my attendance</a>
+        <a href="/change-password" class="btn btn-outline-secondary btn-sm">Change password</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/students" class="btn btn-outline-secondary btn-sm">← Back</a>
+  <h4 class="mb-0 fw-700">Edit student — {{ student.name }}</h4>
+</div>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body px-4 py-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label small fw-500">Full name</label>
+            <input type="text" name="name" class="form-control" value="{{ student.name }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-500">Roll number</label>
+            <input type="text" class="form-control" value="{{ student.roll_no }}" disabled/>
+            <div class="text-muted" style="font-size:.75rem;margin-top:4px">Roll number cannot be changed.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-500">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ student.email or '' }}"/>
+          </div>
+          <hr/>
+          <div class="mb-1 fw-500 small">Login credentials</div>
+          <div class="mb-3 mt-2">
+            <label class="form-label small fw-500">Username</label>
+            <input type="text" name="username" class="form-control" value="{{ student.username or '' }}" placeholder="Leave blank to keep current"/>
+          </div>
+          <div class="mb-4">
+            <label class="form-label small fw-500">New password</label>
+            <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current"/>
+          </div>
+          <button type="submit" class="btn btn-dark w-100">Save changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

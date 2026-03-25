@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="mb-0 fw-700">Teacher Dashboard</h4>
+    <span class="text-muted small">Welcome back, {{ current_user.name or current_user.username }}</span>
+  </div>
+  <div>
+    <a href="{{ url_for('mark_attendance') }}" class="btn btn-primary btn-sm px-3 me-2" style="background:#4e9af1;border:none;">Mark Attendance</a>
+  </div>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num text-dark">{{ subjects|length }}</div>
+      <div class="stat-label">Total Subjects</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#15803d">{{ good|length }}</div>
+      <div class="stat-label">Good Standing (≥75%)</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-num" style="color:#b91c1c">{{ at_risk|length }}</div>
+      <div class="stat-label">At Risk (&lt;75%)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Status banner -->
+{% if total_students == 0 %}
+  <div class="alert border-0 rounded-3 mb-4" style="background:#f3f4f6;color:#6b7280;padding:12px 18px;">
+    Your class has no students yet. Navigate to <strong>Students</strong> to add some.
+  </div>
+{% elif alert %}
+  <div class="mb-4" style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 18px;color:#b91c1c;font-size:.875rem">
+    <strong>Critical Alert —</strong> More than 30% of your class is at risk (attendance below 75%). Please review the student list immediately.
+  </div>
+{% else %}
+  <div class="mb-4" style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 18px;color:#15803d;font-size:.875rem">
+    <strong>Healthy Status —</strong> Your class attendance is looking good overall.
+  </div>
+{% endif %}
+
+<div class="row g-4">
+  <!-- At-Risk Students -->
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-header px-4 py-3 d-flex justify-content-between align-items-center">
+        <span>Students At Risk</span>
+        <a href="{{ url_for('students') }}" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th class="px-4">Roll No</th>
+              <th>Name</th>
+              <th>Attendance %</th>
+              <th class="text-end px-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in at_risk %}
+            <tr>
+              <td class="px-4 align-middle">{{ s.roll_no }}</td>
+              <td class="fw-500 align-middle">{{ s.name }}</td>
+              <td class="align-middle">
+                <span class="fw-500" style="color:#b91c1c">{{ s.attendance_percentage() }}%</span>
+                <div class="pct-bar" style="width:100px;margin-top:4px;">
+                  <div class="pct-fill" style="width:{{ s.attendance_percentage() }}%;background:#ef4444"></div>
+                </div>
+              </td>
+              <td class="align-middle text-end px-4">
+                <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn btn-sm btn-light border">Details</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-4">No students are currently at risk.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header px-4 py-3">Recently Marked Attendance</div>
+      {% if recent %}
+      <ul class="list-group list-group-flush">
+        {% for r in recent %}
+        <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fw-500">{{ r.student.name }}</div>
+            <div class="text-muted" style="font-size:.75rem">
+              {{ r.subject.name }} · {{ r.date.strftime('%d %b %Y') }}
+            </div>
+          </div>
+          {% if r.status == 'present' %}
+            <span class="badge" style="background:#dcfce7;color:#166534;font-weight:600;padding:5px 8px;border-radius:6px;">Present</span>
+          {% else %}
+            <span class="badge" style="background:#fee2e2;color:#991b1b;font-weight:600;padding:5px 8px;border-radius:6px;">Absent</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="card-body text-center text-muted py-4">No attendance marked recently.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
